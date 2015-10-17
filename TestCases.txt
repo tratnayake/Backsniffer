@@ -1,0 +1,15 @@
+Test:
+Client
+1.  Is the process title of the client changed to Non-Suspicious-Program?
+
+Server & Client
+2.  Test actual command output:
+      -whoami
+      -ipaddr
+      -touch "test2.txt"
+      -ls
+      -iptables -L
+
+
+Server
+3. Test that the commands work even with  Firewall on.
