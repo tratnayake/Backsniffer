@@ -54,9 +54,9 @@ def usage():
             print "Please ensure that the IV is 16 characters in legnth"
             sys.exit()
         global ttlKey
-        dstPort = sys.argv[4]
+        dstPort = int(sys.argv[1])
         print "dstPort is " + str(dstPort)
-        ttlKey  = int(sys.argv[1])
+        ttlKey  = int(sys.argv[2])
         print "ttlKey is " + str(ttlKey)
         decryptionKey = sys.argv[3]
         print "Decryption key is " + decryptionKey
@@ -99,9 +99,9 @@ def decryptCommand(command):
 --      Encrypted with AES CFB.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def encryptCommand(command):
-    global encryptionKey
+    global decryptionKey
     global ttlKey
-    encryptionKey = encryptionKey
+    encryptionKey = decryptionKey
     ttlKey = ttlKey
     # key='0123456789abcdef'
     # IV = "abcdefghijklmnop"
@@ -152,4 +152,4 @@ if __name__ == "__main__":
     #Listen for connections
     listening = True;
     while listening:
-        sniff(filter='tcp and dst port '+dstPort, stop_filter=receivedPacket)
+        sniff(filter='tcp and dst port '+str(dstPort), stop_filter=receivedPacket)
