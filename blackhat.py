@@ -46,7 +46,7 @@ global dstPort
 --      None.
 --  Description:
 --      Ensures that user enters in the proper values by checking the number of arguments
---      Command should be in the format python blackhat.py <targetIP> <sourcePort> 
+--      Command should be in the format python blackhat.py <targetIP> <sourcePort>
 --      <dstPort> <ttlKey> <encryptionKey> <IV
 --      i.e. - python blackhat.py 192.168.0.3 500 80 71 012345789abcdef abcdefghijklmnop
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -118,7 +118,6 @@ def encryptCommand(command):
 def decryptCommand(command):
     global encryptionKey
     decryptionKey = encryptionKey
-    print "decryptionKey is " + decryptionKey
     global IV
     IV = IV
     decryptor = AES.new(decryptionKey, AES.MODE_CFB, IV=IV)
@@ -211,5 +210,4 @@ if __name__ == "__main__":
         else:
             sendCommand(encryptCommand(command))
             global sourcePort
-            print sourcePort
             sniff(timeout=1, filter="tcp and dst port " + sourcePort + " and src port " + str(dstPort), stop_filter=commandResult)
