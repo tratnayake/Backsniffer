@@ -60,7 +60,7 @@ def usage():
     global IV
     global dstPort 
     global processName
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         print "Please use format python client.py <dstPort> <ttlkey> <decryptionKey> <IV> <processName>"
         sys.exit()
     else:
