@@ -4,6 +4,8 @@ Backsniffer
 
 Backsniffer is a covert communications suite comprised of a victim-side backdoor application and shell application that allows for an attacker to execute commands on a compromised system remotely.
 
+Full assignment documentation including psuedocode, code listings & testing can be found in the docs folder
+
 ----------
 Features
 -----------
