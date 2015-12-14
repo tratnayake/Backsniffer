@@ -44,10 +44,22 @@ Some features of the Backsniffer suite include:
     are two layers of authentication to ensure that the backdoor only
     picks up messages that are meant for it.
 
+
 -   **AES 256 Bit Encryption\
     **All messages sent between the client and backdoor are encrypted
     using AES 256 bit encryption to mitigate any chance of easy
     discovery via packet captures.
+
+Full assignment documentation including psuedocode, code listings & testing can be found in the docs folder
+
+----------
+Features
+-----------
+ - **Firewall Evasion** Commands are able to get through to the target machine even with a running firewall due to the use of raw-sockets to sniff for packets.
+ - **Process Masking** The back-door module running on the client’s machine can camouflage itself by changing the name of it’s process. This allows it to remain invisible through usual detection methods such as running ‘ps aux’.
+ - **Authentication** By checking for a pre-determined TTL and destination port, there are two layers of authentication to ensure that the backdoor only picks up messages that are meant for it.
+ - **AES 256 Bit Encryption** All messages sent between the client and backdoor are encrypted using AES 256 bit encryption to mitigate any chance of easy discovery via packet captures.
+
 
 Practical Application
 ---------------------
